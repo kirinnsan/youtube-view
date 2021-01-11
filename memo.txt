@@ -1,0 +1,11 @@
+リソースのパーツ
+https://developers.google.com/youtube/v3/getting-started?hl=ja#partial
+
+YouTube Data APIで使用するpartパラメータについて
+https://developers.google.com/youtube/v3/getting-started?hl=ja#part
+サンプル
+https://developers.google.com/youtube/v3/getting-started?hl=ja
+
+クォータの使用量
+https://developers.google.com/youtube/v3/getting-started?hl=ja#quota
+
