@@ -1,13 +1,25 @@
 import re
 
+ZERO_SEC = 0
+
 
 def convert_video_time_sec(duration):
     """
     ISO8601文字列としてフォーマットされた動画時間を秒単位で返す。
-    例）PT23M54S
-    PTはTimeDurationの略で、23Mは23分、54Sは54秒
+    例）
+    PT23M54S
+    23分、54秒
+    P3Y6M4DT12H30M5S
+    3年、6ヶ月、4日、12時間、30分、5秒
+
+    Note:ISO8601について
+        https://ja.wikipedia.org/wiki/ISO_8601
     """
-    time_duration_str = duration[2:]
+    m = re.search('T.*', duration)
+    if m is None:
+        return ZERO_SEC
+
+    time_duration_str = m.group().replace('T', '')
 
     result = re.split('[HMS]', time_duration_str)
     if result is None:
