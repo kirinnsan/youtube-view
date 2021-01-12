@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y vim
 
-RUN pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib pandas
+RUN pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib pandas dash==1.18.1
 
 COPY . .
 
