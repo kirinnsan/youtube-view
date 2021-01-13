@@ -11,14 +11,22 @@ SCOPES = ['https://www.googleapis.com/auth/youtube']
 YOUTUBE_VIDEO_BASE_URL = 'https://www.youtube.com/watch?v='
 
 
-class WatchHisroty(object):
+class WatchHistory(object):
+    """視聴履歴を保持するクラス"""
+
     def __inti__(self, title, title_url, date_time):
         self.title = title
         self.title_url = title_url
         self.data_time = date_time
+        if not isinstance(title_url, str):
+            self.video_id = title_url.replace(YOUTUBE_VIDEO_BASE_URL, '')
+        else:
+            self.video_id = ''
 
 
 class VideoInfo(object):
+    """ビデオ情報を保持するクラス"""
+
     def __init__(self, id, title, categoryId, play_time_sec):
         self.id = id
         self.title = title
@@ -26,12 +34,20 @@ class VideoInfo(object):
         self.play_time_sec = play_time_sec
 
 
-class History(object):
-    def __init__(self):
+class HistoryGeneral(object):
+    """履歴情報を管理するクラス"""
+
+    def __init__(self, watchHistories: WatchHistory):
+        self.__watch_history_list = [WatchHistory(
+            w[0], w[1], w[2]) for w in WatchHistory]
         self.__video_info_list = []
 
-    def add_video_info(self, video_info):
+    def add_video_info(self, video_info: VideoInfo):
         self.video_info_list.append(video_info)
+
+    @property
+    def watch_history_list(self):
+        return self.__watch_history_list
 
     @property
     def video_info_list(self):
@@ -65,13 +81,13 @@ def load_watch_history():
     df_range = df[df['time'] > datetime(
         today.year, today.month, 10, tzinfo=timezone.utc)]
 
-    result = df_range[['time', 'titleUrl']]
-    time_and_video_url_list = result.values.tolist()
+    result = df_range[['title', 'titleUrl', 'time']]
+    result = result.values.tolist()
 
-    return time_and_video_url_list
+    return result
 
 
-def create_video_id_list(data_list):
+def create_video_id(data_list):
     video_id_list = []
     for data in data_list:
         video_url = data[1]
@@ -86,14 +102,14 @@ def create_video_id_list(data_list):
 
 def main():
     # 再生履歴データ読み込み
-    time_and_video_url_list = load_watch_history()
+    watch_histroy = load_watch_history()
 
-    video_id_list = create_video_id_list(time_and_video_url_list)
+    history = HistoryGeneral(watch_histroy)
+
+    video_id_list = create_video_id(watch_histroy)
 
     creds = auth.authenticate(SCOPES)
     client = ApiClient(creds)
-
-    history = History()
 
     # 再生履歴のビデオ情報を取得
     for index in range(0, len(video_id_list), 50):
