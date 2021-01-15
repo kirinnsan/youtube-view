@@ -5,6 +5,7 @@ import pandas as pd
 import auth
 from client import ApiClient
 from util import convert_video_time_sec
+from visualize import showChart
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/youtube']
@@ -14,11 +15,11 @@ YOUTUBE_VIDEO_BASE_URL = 'https://www.youtube.com/watch?v='
 class WatchHistory(object):
     """視聴履歴を保持するクラス"""
 
-    def __inti__(self, title, title_url, date_time):
+    def __init__(self, title, title_url, date_time):
         self.title = title
         self.title_url = title_url
-        self.data_time = date_time
-        if not isinstance(title_url, str):
+        self.date_time = date_time
+        if isinstance(title_url, str):
             self.video_id = title_url.replace(YOUTUBE_VIDEO_BASE_URL, '')
         else:
             self.video_id = ''
@@ -39,7 +40,7 @@ class HistoryGeneral(object):
 
     def __init__(self, watchHistories: WatchHistory):
         self.__watch_history_list = [WatchHistory(
-            w[0], w[1], w[2]) for w in WatchHistory]
+            w[0], w[1], w[2]) for w in watchHistories]
         self.__video_info_list = []
 
     def add_video_info(self, video_info: VideoInfo):
@@ -59,9 +60,24 @@ class HistoryGeneral(object):
             total_time_sec += video.play_time_sec
         return total_time_sec
 
-    # @video_info_list.setter
-    # def video_info_list(self, video_info_list):
-    #     self.__video_info_list = video_info_list
+    def statistics(self):
+        result = []
+        for video in self.video_info_list:
+            video_id = video.id
+            for watch_history in self.watch_history_list:
+                if watch_history.video_id == video_id:
+                    # TODO チャートで表示できる形にする
+                    result.append({
+                        'date_time': watch_history.date_time,
+                        'time_sec': video.play_time_sec
+                    })
+        return result
+
+    def aggregate(self, data_list):
+        """日付毎にデータを集計"""
+        df_agg = pd.DataFrame(data_list)
+        print(df_agg)
+        return df_agg
 
 
 def load_watch_history():
@@ -133,7 +149,11 @@ def main():
 
             history.add_video_info(video_info)
 
-    print(history.get_viewing_time())
+    total_sec = history.get_viewing_time()
+    viewing_time_by_day = history.statistics()
+    result = history.aggregate(viewing_time_by_day)
+
+    showChart(result)
 
 
 if __name__ == '__main__':

@@ -7,34 +7,33 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
-import pandas as pd
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+def showChart(df):
 
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-df = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-})
+    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
+    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-app.layout = html.Div(children=[
-    html.H1(children='Hello Dash'),
+    # assume you have a "long-form" data frame
+    # see https://plotly.com/python/px-arguments/ for more options
+    fig = px.line(df, x="date_time", y="time_sec")
 
-    html.Div(children='''
-        Dash: A web application framework for Python.
-    '''),
+    app.layout = html.Div(children=[
+        html.H1(children='YouTube視聴履歴'),
 
-    dcc.Graph(
-        id='example-graph',
-        figure=fig
-    )
-])
+        html.Div(children='''
+            過去1週間の視聴時間の表示.
+        '''),
+
+        dcc.Graph(
+            id='example-graph',
+            figure=fig
+        )
+    ])
+
+    app.run_server(debug=True)
+
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    showChart()
