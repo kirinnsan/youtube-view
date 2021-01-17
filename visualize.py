@@ -17,7 +17,8 @@ def showChart(df):
 
     # assume you have a "long-form" data frame
     # see https://plotly.com/python/px-arguments/ for more options
-    fig = px.line(df, x="date_time", y="time_sec")
+    fig = px.line(df, x=[df.index], y=df.time_sec)
+    fig.update_xaxes(dtick=1*24*60*60*1000)  # x軸を1日毎に表示
 
     app.layout = html.Div(children=[
         html.H1(children='YouTube視聴履歴'),
@@ -36,4 +37,8 @@ def showChart(df):
 
 
 if __name__ == '__main__':
-    showChart()
+    # import pandas as pd
+    # df = pd.read_csv('./test.csv', header=0, parse_dates=['datetime'])
+    # ret = df.groupby(df['datetime'].dt.date).sum()
+    # showChart(ret)
+    pass

@@ -66,7 +66,6 @@ class HistoryGeneral(object):
             video_id = video.id
             for watch_history in self.watch_history_list:
                 if watch_history.video_id == video_id:
-                    # TODO チャートで表示できる形にする
                     result.append({
                         'date_time': watch_history.date_time,
                         'time_sec': video.play_time_sec
@@ -76,8 +75,9 @@ class HistoryGeneral(object):
     def aggregate(self, data_list):
         """日付毎にデータを集計"""
         df_agg = pd.DataFrame(data_list)
-        print(df_agg)
-        return df_agg
+        result = df_agg.groupby(df_agg['date_time'].dt.date).sum()
+        print(result)
+        return result
 
 
 def load_watch_history():
@@ -150,10 +150,10 @@ def main():
             history.add_video_info(video_info)
 
     total_sec = history.get_viewing_time()
-    viewing_time_by_day = history.statistics()
-    result = history.aggregate(viewing_time_by_day)
+    result = history.statistics()
+    viewing_time_by_day = history.aggregate(result)
 
-    showChart(result)
+    showChart(viewing_time_by_day)
 
 
 if __name__ == '__main__':
