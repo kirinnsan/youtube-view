@@ -22,11 +22,19 @@ def showChart(total_hour, df):
 
     app.layout = html.Div(children=[
         html.H1(children='YouTube再生履歴'),
-        html.Div(children=f'合計再生時間:{total_hour}時間'),
+        html.H3(children=f'合計再生時間:{total_hour}時間'),
+        # html.Div(children=f'合計再生時間:{total_hour}時間'),
+        dcc.DatePickerRange(
+            id='date-range',
+            min_date_allowed=df.index.min(),
+            max_date_allowed=df.index.max(),
+            start_date=df.index.min(),
+            end_date=df.index.max(),
+        ),
         dcc.Graph(
             id='example-graph',
-            figure=fig
-        )
+            figure=fig,
+        ),
     ])
 
     app.run_server(debug=True)
@@ -36,5 +44,6 @@ if __name__ == '__main__':
     # import pandas as pd
     # df = pd.read_csv('./test.csv', header=0, parse_dates=['datetime'])
     # ret = df.groupby(df['datetime'].dt.date).sum()
-    # showChart(ret)
+    # print(ret)
+    # showChart(20, ret)
     pass
