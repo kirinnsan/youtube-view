@@ -21,16 +21,26 @@ def showChart(total_hour, df):
     fig.update_xaxes(tickformat="%Y-%m-%d", dtick=1*24*60*60*1000)  # x軸を1日毎に表示
 
     app.layout = html.Div(children=[
-        html.H1(children='YouTube再生履歴'),
+        # html.H1(children='YouTube再生履歴'),
         html.H3(children=f'合計再生時間:{total_hour}時間'),
-        # html.Div(children=f'合計再生時間:{total_hour}時間'),
-        dcc.DatePickerRange(
-            id='date-range',
-            min_date_allowed=df.index.min(),
-            max_date_allowed=df.index.max(),
-            start_date=df.index.min(),
-            end_date=df.index.max(),
-        ),
+        html.Div(children=[
+            html.Div(
+                children="日付範囲",
+            ),
+            dcc.DatePickerRange(
+                id='date-range',
+                min_date_allowed=df.index.min(),
+                max_date_allowed=df.index.max(),
+                start_date=df.index.min(),
+                end_date=df.index.max(),
+            ),
+        ]),
+        html.H4(children='日別のYouTube再生時間', style={
+            'textAlign': 'center',
+        }),
+        # html.Div(children='日別のYouTube再生時間.', style={
+        #     'textAlign': 'center',
+        # }),
         dcc.Graph(
             id='example-graph',
             figure=fig,
@@ -41,9 +51,9 @@ def showChart(total_hour, df):
 
 
 if __name__ == '__main__':
-    # import pandas as pd
-    # df = pd.read_csv('./test.csv', header=0, parse_dates=['datetime'])
-    # ret = df.groupby(df['datetime'].dt.date).sum()
-    # print(ret)
-    # showChart(20, ret)
-    pass
+    import pandas as pd
+    df = pd.read_csv('./test.csv', header=0, parse_dates=['datetime'])
+    ret = df.groupby(df['datetime'].dt.date).sum()
+    print(ret)
+    showChart(20, ret)
+    # pass
