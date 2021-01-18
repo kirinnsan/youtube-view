@@ -40,8 +40,7 @@ class ApiClient(object):
 
         return result
 
-    def get_youtube_playlists(self, list_id):
-        # Call the Youtube API
+    def get_youtube_playlists_list(self, list_id):
         try:
             result = self.service.playlists().list(
                 mine=True,

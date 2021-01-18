@@ -68,7 +68,7 @@ class HistoryGeneral(object):
                 if watch_history.video_id == video_id:
                     result.append({
                         'date_time': watch_history.date_time,
-                        'time_sec': video.play_time_sec
+                        'time_minutes': video.play_time_sec / 60
                     })
         return result
 
@@ -76,7 +76,6 @@ class HistoryGeneral(object):
         """日付毎にデータを集計"""
         df_agg = pd.DataFrame(data_list)
         result = df_agg.groupby(df_agg['date_time'].dt.date).sum()
-        print(result)
         return result
 
 
@@ -89,13 +88,13 @@ def load_watch_history():
     df['time'] = pd.to_datetime(df['time'])
 
     # 今月視聴したデータ取得
-    # today = datetime.today()
-    # df_range = df[df['time'] > datetime(
-    #     today.year, today.month, 1, tzinfo=timezone.utc)]
-    # TODO 動作確認のため、2021年1月10日以降のデータを対象
     today = datetime.today()
     df_range = df[df['time'] > datetime(
-        today.year, today.month, 10, tzinfo=timezone.utc)]
+        today.year, today.month, 1, tzinfo=timezone.utc)]
+    # 動作確認のため、2021年1月10日以降のデータを対象
+    # today = datetime.today()
+    # df_range = df[df['time'] > datetime(
+    #     today.year, today.month, 10, tzinfo=timezone.utc)]
 
     result = df_range[['title', 'titleUrl', 'time']]
     result = result.values.tolist()
@@ -144,16 +143,16 @@ def main():
             category_id = video_item['snippet']['categoryId']
             duration_sec = convert_video_time_sec(
                 video_item['contentDetails']['duration'])
-            # print(video_item)
             video_info = VideoInfo(id, title, category_id, duration_sec)
 
             history.add_video_info(video_info)
 
     total_sec = history.get_viewing_time()
+    total_hour = total_sec / 3600
     result = history.statistics()
     viewing_time_by_day = history.aggregate(result)
 
-    showChart(viewing_time_by_day)
+    showChart(total_hour, viewing_time_by_day)
 
 
 if __name__ == '__main__':

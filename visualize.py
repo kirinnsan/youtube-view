@@ -9,7 +9,7 @@ import dash_html_components as html
 import plotly.express as px
 
 
-def showChart(df):
+def showChart(total_hour, df):
 
     external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -17,16 +17,12 @@ def showChart(df):
 
     # assume you have a "long-form" data frame
     # see https://plotly.com/python/px-arguments/ for more options
-    fig = px.line(df, x=[df.index], y=df.time_sec)
-    fig.update_xaxes(dtick=1*24*60*60*1000)  # x軸を1日毎に表示
+    fig = px.line(df, x=[df.index], y=df.time_minutes)
+    fig.update_xaxes(tickformat="%Y-%m-%d", dtick=1*24*60*60*1000)  # x軸を1日毎に表示
 
     app.layout = html.Div(children=[
-        html.H1(children='YouTube視聴履歴'),
-
-        html.Div(children='''
-            過去1週間の視聴時間の表示.
-        '''),
-
+        html.H1(children='YouTube再生履歴'),
+        html.Div(children=f'合計再生時間:{total_hour}時間'),
         dcc.Graph(
             id='example-graph',
             figure=fig
