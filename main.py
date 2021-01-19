@@ -75,8 +75,10 @@ class HistoryGeneral(object):
     def aggregate(self, data_list):
         """日付毎にデータを集計"""
         df_agg = pd.DataFrame(data_list)
-        result = df_agg.groupby(df_agg['date_time'].dt.date).sum()
-        return result
+        df_result = df_agg.groupby(df_agg['date_time'].dt.date).sum()
+        # インデックスをdatetimeに変換
+        df_result.index = pd.to_datetime(df_result.index)
+        return df_result
 
 
 def load_watch_history():
@@ -150,9 +152,9 @@ def main():
     total_sec = history.get_viewing_time()
     total_hour = total_sec / 3600
     result = history.statistics()
-    viewing_time_by_day = history.aggregate(result)
+    df = history.aggregate(result)
 
-    showChart(total_hour, viewing_time_by_day)
+    showChart(total_hour, df)
 
 
 if __name__ == '__main__':

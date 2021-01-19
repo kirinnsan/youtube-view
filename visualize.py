@@ -22,25 +22,27 @@ def showChart(total_hour, df):
     fig.update_xaxes(tickformat="%Y-%m-%d", dtick=1*24*60*60*1000)  # x軸を1日毎に表示
 
     app.layout = html.Div(children=[
-        html.H3(children=f'合計再生時間:{total_hour}時間'),
+        html.H6(children=f'合計再生時間:{total_hour}時間'),
         html.Div(children=[
             html.Div(
                 children="日付範囲",
             ),
             dcc.DatePickerRange(
                 id='date-range',
+                display_format='YYYY-MM-DD',
                 min_date_allowed=df.index.min(),
                 max_date_allowed=df.index.max(),
                 start_date=df.index.min(),
                 end_date=df.index.max(),
             ),
         ]),
-        html.H4(children='日別のYouTube再生時間', style={
+        html.Div(children='日別のYouTube再生時間', style={
             'textAlign': 'center',
         }),
         dcc.Graph(
             id='playback-time-graph',
             figure=fig,
+            config={"displayModeBar": False}
         ),
     ])
 
@@ -64,9 +66,9 @@ def showChart(total_hour, df):
 if __name__ == '__main__':
     # import pandas as pd
     # _df = pd.read_csv('./test.csv', parse_dates=['datetime'])
-    # 日付で集計
+    # # 日付で集計
     # ret = _df.groupby(_df['datetime'].dt.date).sum()
-    # インデックスをdatetimeに変換
+    # # インデックスをdatetimeに変換
     # ret.index = pd.to_datetime(ret.index)
     # showChart(20, ret)
     pass
