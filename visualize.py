@@ -7,6 +7,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
+from dash.dependencies import Input, Output
 
 
 def showChart(total_hour, df):
@@ -21,7 +22,6 @@ def showChart(total_hour, df):
     fig.update_xaxes(tickformat="%Y-%m-%d", dtick=1*24*60*60*1000)  # x軸を1日毎に表示
 
     app.layout = html.Div(children=[
-        # html.H1(children='YouTube再生履歴'),
         html.H3(children=f'合計再生時間:{total_hour}時間'),
         html.Div(children=[
             html.Div(
@@ -38,22 +38,35 @@ def showChart(total_hour, df):
         html.H4(children='日別のYouTube再生時間', style={
             'textAlign': 'center',
         }),
-        # html.Div(children='日別のYouTube再生時間.', style={
-        #     'textAlign': 'center',
-        # }),
         dcc.Graph(
-            id='example-graph',
+            id='playback-time-graph',
             figure=fig,
         ),
     ])
+
+    @app.callback(
+        Output('playback-time-graph', 'figure'),
+        Input('date-range', 'start_date'),
+        Input('date-range', 'end_date')
+    )
+    def update_output_div(start_date, end_date):
+        set_df = df[start_date: end_date]
+        set_fig = px.line(
+            set_df, x=[set_df.index], y=set_df['time_minutes'])
+        set_fig.update_xaxes(tickformat="%Y-%m-%d",
+                             dtick=1*24*60*60*1000)  # x軸を1日毎に表示
+
+        return set_fig
 
     app.run_server(debug=True)
 
 
 if __name__ == '__main__':
-    import pandas as pd
-    df = pd.read_csv('./test.csv', header=0, parse_dates=['datetime'])
-    ret = df.groupby(df['datetime'].dt.date).sum()
-    print(ret)
-    showChart(20, ret)
-    # pass
+    # import pandas as pd
+    # _df = pd.read_csv('./test.csv', parse_dates=['datetime'])
+    # 日付で集計
+    # ret = _df.groupby(_df['datetime'].dt.date).sum()
+    # インデックスをdatetimeに変換
+    # ret.index = pd.to_datetime(ret.index)
+    # showChart(20, ret)
+    pass
