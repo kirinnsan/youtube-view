@@ -81,7 +81,7 @@ class HistoryGeneral(object):
         return df_result
 
 
-def load_watch_history():
+def load_watch_history(start_date):
 
     # Youtube履歴のjson読み込み
     df = pd.read_json('watch-history.json', encoding='utf-8')
@@ -90,9 +90,8 @@ def load_watch_history():
     df['time'] = pd.to_datetime(df['time'])
 
     # 今月視聴したデータ取得
-    today = datetime.today()
     df_range = df[df['time'] > datetime(
-        today.year, today.month, 1, tzinfo=timezone.utc)]
+        start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
     # 動作確認のため、2021年1月10日以降のデータを対象
     # today = datetime.today()
     # df_range = df[df['time'] > datetime(
@@ -117,9 +116,9 @@ def create_video_id(data_list):
     return video_id_list
 
 
-def main():
+def main(start_date):
     # 再生履歴データ読み込み
-    watch_histroy = load_watch_history()
+    watch_histroy = load_watch_history(start_date)
 
     history = HistoryGeneral(watch_histroy)
 
@@ -158,4 +157,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    start_date = datetime.today()
+    main(start_date)
