@@ -81,6 +81,24 @@ class HistoryGeneral(object):
         return df_result
 
 
+class VideoCategory(object):
+    """YouTube動画のカテゴリ情報を保持する。"""
+
+    video_category_list = []
+
+    @staticmethod
+    def load_video_category(api_client: ApiClient):
+        result = api_client.fetch_video_categories_list()
+        for item in result['items']:
+            id = item['id']
+            title = item['snippet']['title']
+            VideoCategory.video_category_list.append({
+                'id': id,
+                'title': title
+            })
+        print(VideoCategory.video_category_list)
+
+
 def load_watch_history(start_date):
 
     # Youtube履歴のjson読み込み
@@ -127,23 +145,27 @@ def main(start_date):
     creds = auth.authenticate(SCOPES)
     client = ApiClient(creds)
 
-    # 再生履歴のビデオ情報を取得
+    VideoCategory.load_video_category(client)
+
+    # 再生履歴の動画情報を取得
     for index in range(0, len(video_id_list), 50):
 
         tmp = video_id_list[index:index + 50]
         video_id_list_str = ','.join(tmp)
 
-        result = client.get_videos_list(video_id_list_str)
+        # 動画情報のリクエスト実行
+        result = client.fetch_videos_list(video_id_list_str)
 
         video_items = result['items']
 
-        # 動画情報を取得
         for video_item in video_items:
             id = video_item['id']
             title = video_item['snippet']['title']
             category_id = video_item['snippet']['categoryId']
             duration_sec = convert_video_time_sec(
                 video_item['contentDetails']['duration'])
+            # TODO カテゴリーIDからビデオカテゴリ名に変換する
+
             video_info = VideoInfo(id, title, category_id, duration_sec)
 
             history.add_video_info(video_info)
