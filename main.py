@@ -12,8 +12,8 @@ SCOPES = ['https://www.googleapis.com/auth/youtube']
 YOUTUBE_VIDEO_BASE_URL = 'https://www.youtube.com/watch?v='
 
 
-class WatchHistory(object):
-    """視聴履歴を保持するクラス"""
+class PlaybackHistory(object):
+    """再生履歴を保持するクラス"""
 
     def __init__(self, title, title_url, date_time):
         self.title = title
@@ -25,25 +25,26 @@ class WatchHistory(object):
             self.video_id = ''
 
 
-class VideoInfo(object):
+class Video(object):
     """ビデオ情報を保持するクラス"""
 
-    def __init__(self, id, title, categoryId, play_time_sec):
+    def __init__(self, id, title, category_id, category_name, play_time_sec):
         self.id = id
         self.title = title
-        self.categoryId = categoryId
+        self.category_id = category_id
+        self.category_name = category_name
         self.play_time_sec = play_time_sec
 
 
 class HistoryGeneral(object):
     """履歴情報を管理するクラス"""
 
-    def __init__(self, watchHistories: WatchHistory):
-        self.__watch_history_list = [WatchHistory(
+    def __init__(self, watchHistories: PlaybackHistory):
+        self.__watch_history_list = [PlaybackHistory(
             w[0], w[1], w[2]) for w in watchHistories]
         self.__video_info_list = []
 
-    def add_video_info(self, video_info: VideoInfo):
+    def add_video_info(self, video_info: Video):
         self.video_info_list.append(video_info)
 
     @property
@@ -68,23 +69,34 @@ class HistoryGeneral(object):
                 if watch_history.video_id == video_id:
                     result.append({
                         'date_time': watch_history.date_time,
-                        'time_minutes': video.play_time_sec / 60
+                        'time_minutes': video.play_time_sec / 60,
+                        'video_category_name': video.category_name
                     })
         return result
 
     def aggregate(self, data_list):
-        """日付毎にデータを集計"""
-        df_agg = pd.DataFrame(data_list)
-        df_result = df_agg.groupby(df_agg['date_time'].dt.date).sum()
+        df = pd.DataFrame(data_list)
+        df_playback_time_by_day = df.groupby(
+            df['date_time'].dt.date).sum()
         # インデックスをdatetimeに変換
-        df_result.index = pd.to_datetime(df_result.index)
-        return df_result
+        df_playback_time_by_day.index = pd.to_datetime(
+            df_playback_time_by_day.index)
+        return df_playback_time_by_day
 
 
 class VideoCategory(object):
     """YouTube動画のカテゴリ情報を保持する。"""
 
     video_category_list = []
+
+    @staticmethod
+    def get_category_name_from_category_id(category_id):
+        category_name = ''
+        for d in VideoCategory.video_category_list:
+            if d.get('id') == category_id:
+                category_name = d.get('title', 'NoCategory')
+                break
+        return category_name
 
     @staticmethod
     def load_video_category(api_client: ApiClient):
@@ -108,12 +120,12 @@ def load_watch_history(start_date):
     df['time'] = pd.to_datetime(df['time'])
 
     # 今月視聴したデータ取得
-    df_range = df[df['time'] > datetime(
-        start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
-    # 動作確認のため、2021年1月10日以降のデータを対象
-    # today = datetime.today()
     # df_range = df[df['time'] > datetime(
-    #     today.year, today.month, 10, tzinfo=timezone.utc)]
+    #     start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
+    # 動作確認のため、2021年1月10日以降のデータを対象
+    today = datetime.today()
+    df_range = df[df['time'] > datetime(
+        today.year, today.month, 10, tzinfo=timezone.utc)]
 
     result = df_range[['title', 'titleUrl', 'time']]
     result = result.values.tolist()
@@ -164,9 +176,11 @@ def main(start_date):
             category_id = video_item['snippet']['categoryId']
             duration_sec = convert_video_time_sec(
                 video_item['contentDetails']['duration'])
-            # TODO カテゴリーIDからビデオカテゴリ名に変換する
-
-            video_info = VideoInfo(id, title, category_id, duration_sec)
+            category_name = VideoCategory.get_category_name_from_category_id(
+                category_id)
+            # 動画情報作成
+            video_info = Video(
+                id, title, category_id, category_name, duration_sec)
 
             history.add_video_info(video_info)
 
