@@ -9,3 +9,7 @@ https://developers.google.com/youtube/v3/getting-started?hl=ja
 クォータの使用量
 https://developers.google.com/youtube/v3/getting-started?hl=ja#quota
 
+OSError: [Errno 98] Address already in use　について
+1. apt install lsof
+2. lsof -i :8050
+3. kill [processID]
