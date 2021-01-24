@@ -13,7 +13,7 @@ import plotly.express as px
 from dash.dependencies import Input, Output
 
 
-def showChart(total_hour, df):
+def showChart(df):
 
     external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -33,21 +33,27 @@ def showChart(total_hour, df):
     fig.update_layout(showlegend=False,
                       title={
                           'text': "日別YouTube再生時間",
+                          'font': {'size': 20},
                           'y': 0.95,
                           'x': 0.5,
                           'xanchor': 'center',
-                          'yanchor': 'top'}
+                          'yanchor': 'top'},
+                      # paper_bgcolor="#EEEEEE",
+                      xaxis={'title': None},
+                      yaxis={'title': {'text': '再生時間（分）', 'font': {'size': 18}}}
                       )
 
     fig_pie = px.pie(df_category_rate, values=df_category_rate.values,
                      names=df_category_rate.index)
     fig_pie.update_layout(title={
                           'text': "再生履歴のビデオカテゴリ",
+                          'font': {'size': 20},
                           'y': 0.95,
                           'x': 0.5,
                           'xanchor': 'center',
-                          'yanchor': 'top'}
-                          )
+                          'yanchor': 'top'},
+                          # paper_bgcolor="#EEEEEE",
+                          margin={'l': 0, 'r': 0})
 
     app.layout = html.Div(children=[
         html.H6(
@@ -70,7 +76,7 @@ def showChart(total_hour, df):
                 start_date=df_playback.index.min(),
                 end_date=df_playback.index.max(),
             )],
-            style={'text-align': 'center'},
+            style={'margin': '10px'},
         ),
         html.Div([
             html.Div([
@@ -78,16 +84,16 @@ def showChart(total_hour, df):
                     id='playback-time-graph',
                     figure=fig,
                     config={"displayModeBar": False}
-                )], style={'display': 'inline-block', 'width': '50%'}
+                )], style={'display': 'inline-block', 'width': '60%'}
             ),
             html.Div([
                 dcc.Graph(
                     id='video-category-graph',
                     figure=fig_pie,
                     config={"displayModeBar": False}
-                )], style={'display': 'inline-block', 'width': '50%'}
+                )], style={'display': 'inline-block', 'width': '40%'}
             )
-        ], style={'backgroundColor': 'white', 'margin': '10px'}
+        ], style={'backgroundColor': 'white', 'margin': '10px', 'text-align': 'center'}
         )
     ])
 
@@ -107,10 +113,15 @@ def showChart(total_hour, df):
         set_fig.update_layout(showlegend=False,
                               title={
                                   'text': "日別YouTube再生時間",
+                                  'font': {'size': 20},
                                   'y': 0.95,
                                   'x': 0.5,
                                   'xanchor': 'center',
-                                  'yanchor': 'top'}
+                                  'yanchor': 'top'},
+                              # paper_bgcolor="#EEEEEE",
+                              xaxis={'title': None},
+                              yaxis={
+                                  'title': {'text': '再生時間（分）', 'font': {'size': 18}}}
                               )
         return set_fig
 
@@ -127,11 +138,13 @@ def showChart(total_hour, df):
                          names=set_df.index)
         set_fig.update_layout(title={
                               'text': "再生履歴のビデオカテゴリ",
+                              'font': {'size': 20},
                               'y': 0.95,
                               'x': 0.5,
                               'xanchor': 'center',
-                              'yanchor': 'top'}
-                              )
+                              'yanchor': 'top'},
+                              # paper_bgcolor="#EEEEEE",
+                              margin={'l': 0, 'r': 0})
         return set_fig
 
     app.run_server(debug=False)
@@ -151,10 +164,7 @@ def aggregate_video_category(df):
 
 
 if __name__ == '__main__':
-    # import pandas as pd
-    # _df = pd.read_csv('./test.csv', parse_dates=['date_time'])
+    _df = pd.read_csv('./test.csv', parse_dates=['date_time'])
     # _df['date_time'] = _df['date_time'].dt.round("S").dt.tz_localize(None)
-    # showChart(20, _df)
-    # print(type(date))
-    # print(date)
+    # showChart(_df)
     pass
