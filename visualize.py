@@ -14,6 +14,7 @@ from dash.dependencies import Input, Output
 
 
 def showChart(df):
+    '''入力データをもとにチャートを作成する。'''
 
     external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -21,39 +22,7 @@ def showChart(df):
 
     df['date_time'] = df['date_time'].dt.round("S").dt.tz_localize(None)
 
-    df_playback = aggregate_playback_time(df)
-    df_category_rate = aggregate_video_category(df)
-
-    # assume you have a "long-form" data frame
-    # see https://plotly.com/python/px-arguments/ for more options
-    fig = px.line(df_playback, x=[df_playback.index],
-                  y=df_playback.time_minutes)
-    fig.update_xaxes(tickformat="%Y-%m-%d", dtick=1 *
-                     24*60*60*1000,)  # x軸を1日毎に表示
-    fig.update_layout(showlegend=False,
-                      title={
-                          'text': "日別YouTube再生時間",
-                          'font': {'size': 20},
-                          'y': 0.95,
-                          'x': 0.5,
-                          'xanchor': 'center',
-                          'yanchor': 'top'},
-                      # paper_bgcolor="#EEEEEE",
-                      xaxis={'title': None},
-                      yaxis={'title': {'text': '再生時間（分）', 'font': {'size': 18}}}
-                      )
-
-    fig_pie = px.pie(df_category_rate, values=df_category_rate.values,
-                     names=df_category_rate.index)
-    fig_pie.update_layout(title={
-                          'text': "再生履歴のビデオカテゴリ",
-                          'font': {'size': 20},
-                          'y': 0.95,
-                          'x': 0.5,
-                          'xanchor': 'center',
-                          'yanchor': 'top'},
-                          # paper_bgcolor="#EEEEEE",
-                          margin={'l': 0, 'r': 0})
+    df_playback_time = aggregate_playback_time(df)
 
     app.layout = html.Div(children=[
         html.H6(
@@ -71,34 +40,28 @@ def showChart(df):
             dcc.DatePickerRange(
                 id='date-range',
                 display_format='YYYY-MM-DD',
-                min_date_allowed=df_playback.index.min(),
-                max_date_allowed=df_playback.index.max(),
-                start_date=df_playback.index.min(),
-                end_date=df_playback.index.max(),
+                min_date_allowed=df_playback_time.index.min(),
+                max_date_allowed=df_playback_time.index.max(),
+                start_date=df_playback_time.index.min(),
+                end_date=df_playback_time.index.max(),
             )],
             style={'margin': '10px'},
         ),
         html.Div([
-            html.Div([
-                dcc.Graph(
-                    id='playback-time-graph',
-                    figure=fig,
-                    config={"displayModeBar": False}
-                )], style={'display': 'inline-block', 'width': '60%'}
+            html.Div(
+                id='playback-time-graph',
+                style={'display': 'inline-block', 'width': '60%'}
             ),
-            html.Div([
-                dcc.Graph(
-                    id='video-category-graph',
-                    figure=fig_pie,
-                    config={"displayModeBar": False}
-                )], style={'display': 'inline-block', 'width': '40%'}
-            )
+            html.Div(
+                id='video-category-graph',
+                style={'display': 'inline-block', 'width': '40%'}
+            ),
         ], style={'backgroundColor': 'white', 'margin': '10px', 'text-align': 'center'}
         )
     ])
 
-    @app.callback(
-        Output('playback-time-graph', 'figure'),
+    @ app.callback(
+        Output('playback-time-graph', 'children'),
         Input('date-range', 'start_date'),
         Input('date-range', 'end_date')
     )
@@ -118,15 +81,17 @@ def showChart(df):
                                   'x': 0.5,
                                   'xanchor': 'center',
                                   'yanchor': 'top'},
-                              # paper_bgcolor="#EEEEEE",
                               xaxis={'title': None},
                               yaxis={
                                   'title': {'text': '再生時間（分）', 'font': {'size': 18}}}
                               )
-        return set_fig
+        return dcc.Graph(
+            figure=set_fig,
+            config={"displayModeBar": False},
+        )
 
-    @app.callback(
-        Output('video-category-graph', 'figure'),
+    @ app.callback(
+        Output('video-category-graph', 'children'),
         Input('date-range', 'start_date'),
         Input('date-range', 'end_date')
     )
@@ -143,9 +108,11 @@ def showChart(df):
                               'x': 0.5,
                               'xanchor': 'center',
                               'yanchor': 'top'},
-                              # paper_bgcolor="#EEEEEE",
                               margin={'l': 0, 'r': 0})
-        return set_fig
+        return dcc.Graph(
+            figure=set_fig,
+            config={"displayModeBar": False},
+        )
 
     app.run_server(debug=False)
 
@@ -164,7 +131,6 @@ def aggregate_video_category(df):
 
 
 if __name__ == '__main__':
-    _df = pd.read_csv('./test.csv', parse_dates=['date_time'])
-    # _df['date_time'] = _df['date_time'].dt.round("S").dt.tz_localize(None)
+    # _df = pd.read_csv('./test.csv', parse_dates=['date_time'])
     # showChart(_df)
     pass
