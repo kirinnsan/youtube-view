@@ -112,10 +112,6 @@ def load_watch_history(start_date):
     # 今月視聴したデータ取得
     df_range = df[df['time'] > datetime(
         start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
-    # TODO 動作確認のため、2021年1月10日以降のデータを対象
-    # today = datetime.today()
-    # df_range = df[df['time'] > datetime(
-    #     today.year, today.month, 10, tzinfo=timezone.utc)]
 
     result = df_range[['title', 'titleUrl', 'time']]
     result = result.values.tolist()
