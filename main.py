@@ -74,15 +74,6 @@ class HistoryGeneral(object):
                     })
         return result
 
-    def aggregate(self, data_list):
-        df = pd.DataFrame(data_list)
-        df_playback_time_by_day = df.groupby(
-            df['date_time'].dt.date).sum()
-        # インデックスをdatetimeに変換
-        df_playback_time_by_day.index = pd.to_datetime(
-            df_playback_time_by_day.index)
-        return df_playback_time_by_day
-
 
 class VideoCategory(object):
     """YouTube動画のカテゴリ情報を保持する。"""
@@ -108,7 +99,6 @@ class VideoCategory(object):
                 'id': id,
                 'title': title
             })
-        print(VideoCategory.video_category_list)
 
 
 def load_watch_history(start_date):
@@ -120,12 +110,12 @@ def load_watch_history(start_date):
     df['time'] = pd.to_datetime(df['time'])
 
     # 今月視聴したデータ取得
-    # df_range = df[df['time'] > datetime(
-    #     start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
-    # 動作確認のため、2021年1月10日以降のデータを対象
-    today = datetime.today()
     df_range = df[df['time'] > datetime(
-        today.year, today.month, 10, tzinfo=timezone.utc)]
+        start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
+    # 動作確認のため、2021年1月10日以降のデータを対象
+    # today = datetime.today()
+    # df_range = df[df['time'] > datetime(
+    #     today.year, today.month, 10, tzinfo=timezone.utc)]
 
     result = df_range[['title', 'titleUrl', 'time']]
     result = result.values.tolist()
@@ -187,9 +177,9 @@ def main(start_date):
     total_sec = history.get_viewing_time()
     total_hour = total_sec / 3600
     result = history.statistics()
-    df = history.aggregate(result)
+    df_result = pd.DataFrame(result)
 
-    showChart(total_hour, df)
+    showChart(total_hour, df_result)
 
 
 if __name__ == '__main__':
