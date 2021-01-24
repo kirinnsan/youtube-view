@@ -112,7 +112,7 @@ def load_watch_history(start_date):
     # 今月視聴したデータ取得
     df_range = df[df['time'] > datetime(
         start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
-    # 動作確認のため、2021年1月10日以降のデータを対象
+    # TODO 動作確認のため、2021年1月10日以降のデータを対象
     # today = datetime.today()
     # df_range = df[df['time'] > datetime(
     #     today.year, today.month, 10, tzinfo=timezone.utc)]
@@ -174,12 +174,10 @@ def main(start_date):
 
             history.add_video_info(video_info)
 
-    total_sec = history.get_viewing_time()
-    total_hour = total_sec / 3600
     result = history.statistics()
     df_result = pd.DataFrame(result)
 
-    showChart(total_hour, df_result)
+    showChart(df_result)
 
 
 if __name__ == '__main__':
