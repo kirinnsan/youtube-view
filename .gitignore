@@ -2,3 +2,4 @@ client_id.json
 token.pickle
 watch-history.json
 __pycache__
+.vscode
