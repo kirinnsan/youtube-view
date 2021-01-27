@@ -20,8 +20,6 @@ def showChart(df):
 
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-    df['date_time'] = df['date_time'].dt.round("S").dt.tz_localize(None)
-
     df_playback_time = aggregate_playback_time(df)
 
     app.layout = html.Div(children=[

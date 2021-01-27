@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
+import calendar
 
 import pandas as pd
 
@@ -101,17 +103,16 @@ class VideoCategory(object):
             })
 
 
-def load_watch_history(start_date):
+def load_watch_history(start_dt, end_dt):
 
     # Youtube履歴のjson読み込み
     df = pd.read_json('watch-history.json', encoding='utf-8')
 
     # timeカラムをdatetime型に変更
-    df['time'] = pd.to_datetime(df['time'])
+    df['time'] = pd.to_datetime(df['time']).dt.round("S").dt.tz_localize(None)
 
-    # 今月視聴したデータ取得
-    df_range = df[df['time'] > datetime(
-        start_date.year, start_date.month, 1, tzinfo=timezone.utc)]
+    # 日付指定した範囲のデータを取得
+    df_range = df[(df['time'] >= start_dt) & (df['time'] <= end_dt)]
 
     result = df_range[['title', 'titleUrl', 'time']]
     result = result.values.tolist()
@@ -132,9 +133,9 @@ def create_video_id(data_list):
     return video_id_list
 
 
-def main(start_date):
+def main(start_date, end_date):
     # 再生履歴データ読み込み
-    watch_histroy = load_watch_history(start_date)
+    watch_histroy = load_watch_history(start_date, end_date)
 
     history = HistoryGeneral(watch_histroy)
 
@@ -177,5 +178,9 @@ def main(start_date):
 
 
 if __name__ == '__main__':
-    start_date = datetime.today()
-    main(start_date)
+    this_month = datetime.today()
+    this_month = datetime(this_month.year, this_month.month, 1)
+    end_of_month = datetime(this_month.year, this_month.month,
+                            calendar.monthrange(this_month.year,
+                                                this_month.month)[1])
+    main(this_month, end_of_month)
